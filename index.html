@@ -423,7 +423,7 @@ const MODULES = {
     hasDryTimer: true
   },
   skincare: {
-    name: '保養品', placeholder: '例如：護膚的水',
+    name: '保養品＆保健食品', placeholder: '例如：護膚水、維C',
     homeIcon: 'bottle', color: '#B87FA0',
     statuses: [
       { key:'unopened', label:'未拆封', color:'#6B9B6E' },
@@ -642,7 +642,7 @@ async function renderGrid(){
       bannerEl.innerHTML = '';
       grid.innerHTML = `<div class="empty">
         <svg viewBox="0 0 24 24">${ICONS[m.homeIcon]}</svg>
-        還沒有物資紀錄<br>點右下角「＋」新增一項
+        還沒有物資紀錄<br><br>點擊右下角「＋」新增一項
       </div>`;
       return;
     }
@@ -673,7 +673,7 @@ async function renderGrid(){
     const statusInfo = m.statuses.find(s => s.key === currentStatus);
     grid.innerHTML = `<div class="empty">
       <svg viewBox="0 0 24 24">${ICONS[statusInfo.icon || m.homeIcon]}</svg>
-      這裡還沒有項目<br>點右下角「＋」新增一件
+      這裡還沒有項目<br><br>點擊右下角「＋」新增一件
     </div>`;
     return;
   }
@@ -824,7 +824,7 @@ async function renderPetStock(){
     bannerEl.innerHTML = '';
     grid.innerHTML = `<div class="empty">
       <svg viewBox="0 0 24 24">${ICONS.rabbit}</svg>
-      還沒有用品紀錄<br>點右下角「＋」新增一項
+      還沒有用品紀錄<br><br>點擊右下角「＋」新增一項
     </div>`;
     return;
   }
@@ -933,7 +933,7 @@ async function renderPetStats(){
   const warnMsgs = [];
   const grassT = todayTotals.find(t => t.key === 'grass');
   const waterT = todayTotals.find(t => t.key === 'water');
-  if(grassT.warn) warnMsgs.push('🌿 草還沒吃到半窩,記得補充');
+  if(grassT.warn) warnMsgs.push('🌿 草還沒吃到半窩');
   if(waterT.total === 0){
     warnMsgs.push('💧 今天還沒有飲水紀錄');
   } else if(waterT.warn){
