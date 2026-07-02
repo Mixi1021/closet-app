@@ -56,6 +56,7 @@
     text-align:left;
     box-shadow: var(--shadow);
     cursor:pointer;
+    position: relative;
   }
   .module-card .icon-wrap{
     width: 42px; height: 42px;
@@ -66,6 +67,12 @@
   .module-card svg{ width:22px; height:22px; stroke:white; fill:none; }
   .module-card h3{ margin: 0 0 3px; font-size: 15px; font-weight: 700; }
   .module-card .sub{ font-size: 12px; color: var(--ink-soft); }
+  .badge{
+    position: absolute; top: 12px; right: 12px;
+    background: #C97D4B; color: white;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
+  }
 
   /* ---------- Module view ---------- */
   .module-view{ display:none; }
@@ -147,7 +154,7 @@
     background: none; border: none; padding: 0; cursor: pointer;
   }
 
-  /* inventory-style card (生活物資) */
+  /* inventory-style card */
   .counter-row{
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom: 6px;
@@ -184,18 +191,6 @@
   }
   .restock-banner b{ display:block; font-size: 13px; margin-bottom: 3px; }
 
-  .module-card{ position: relative; }
-  .badge{
-    position: absolute;
-    top: 12px; right: 12px;
-    background: #C97D4B;
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 20px;
-  }
-
   .empty{
     grid-column: 1 / -1; text-align:center; color: var(--ink-soft);
     padding: 50px 20px; font-size: 14px;
@@ -222,6 +217,8 @@
     background: var(--bg); width: 100%;
     border-radius: 20px 20px 0 0;
     padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
+    max-height: 88vh;
+    overflow-y: auto;
   }
   .modal h2{
     font-family: Georgia, "Noto Serif TC", serif;
@@ -249,6 +246,67 @@
   }
   .btn-primary{ background: var(--ink); color:white; }
   .btn-secondary{ background: var(--line); color: var(--ink); }
+
+  /* ---------- Pet sub-views ---------- */
+  .cal-nav{ display:flex; align-items:center; justify-content:space-between; padding: 4px 20px 10px; }
+  .cal-nav button{ background:none; border:none; font-size:18px; color:var(--ink); cursor:pointer; padding:4px 12px; }
+  .cal-nav .cal-label{ font-size:14px; font-weight:700; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; padding:0 16px; }
+  .cal-dow{ text-align:center; font-size:10px; color:var(--ink-soft); padding-bottom:4px; }
+  .cal-cell{
+    aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:10px; font-size:12px; color:var(--ink); cursor:pointer; position:relative;
+    background: transparent; border:none;
+  }
+  .cal-cell.empty{ visibility:hidden; cursor:default; }
+  .cal-cell.today{ font-weight:800; }
+  .cal-cell.selected{ background: var(--ink); color:white; }
+  .cal-dot{ width:4px; height:4px; border-radius:50%; background: var(--c1); margin-top:2px; }
+  .cal-cell.selected .cal-dot{ background:white; }
+
+  .purchase-list{ padding: 14px 20px 100px; display:flex; flex-direction:column; gap:10px; }
+  .purchase-row{
+    display:flex; align-items:center; gap:10px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:8px; box-shadow:var(--shadow);
+  }
+  .purchase-row img{ width:48px; height:48px; border-radius:8px; object-fit:cover; flex-shrink:0; background:#F1ECE2; }
+  .purchase-row .pinfo{ flex:1; min-width:0; }
+  .purchase-row .pname{ font-size:13px; font-weight:600; margin:0; }
+  .purchase-row .pdate{ font-size:11px; color:var(--ink-soft); margin:2px 0 0; }
+  .purchase-row .del-btn{ margin:0; flex-shrink:0; }
+
+  .stat-wrap{ padding: 14px 20px 100px; }
+  .stat-summary{ display:flex; gap:8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat-card{ flex:1; min-width: 90px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:var(--shadow); }
+  .stat-card .icon-wrap{ width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-bottom:7px; }
+  .stat-card svg{ width:15px; height:15px; stroke:white; }
+  .stat-card .svalue{ font-size:17px; font-weight:800; }
+  .stat-card .slabel{ font-size:10.5px; color:var(--ink-soft); }
+
+  .bar-day{ margin-bottom:12px; }
+  .bar-day .bd-label{ font-size:11px; color:var(--ink-soft); margin-bottom:4px; display:flex; justify-content:space-between; }
+  .bar-track{ height:7px; border-radius:5px; background:var(--line); overflow:hidden; margin-bottom:3px; }
+  .bar-fill{ height:100%; border-radius:5px; }
+  .bar-fill.food{ background: var(--c1); }
+  .bar-fill.water{ background: var(--c2); }
+
+  .log-title{ font-size:13px; font-weight:700; margin: 20px 0 8px; }
+  .log-row{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+  .log-row .ltime{ color:var(--ink-soft); font-size:11px; display:flex; align-items:center; gap:8px; }
+
+  .toggle-group{ display:flex; gap:8px; margin-bottom:12px; }
+  .toggle-btn{
+    flex:1; padding:10px; border-radius:10px; border:1px solid var(--line);
+    background:white; color:var(--ink-soft); font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .toggle-btn.active{ background:var(--ink); color:white; border-color:var(--ink); }
+
+  .field-label{ display:block; font-size:12px; color:var(--ink-soft); margin: 0 0 4px; }
+  .date-input{
+    width:100%; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: white; font-size: 15px; margin-bottom:12px;
+  }
 </style>
 </head>
 <body>
@@ -273,6 +331,8 @@
   <div class="tabs" id="tabs"></div>
   <div id="banner"></div>
   <div class="grid" id="grid"></div>
+  <div id="petCalendarView" style="display:none"></div>
+  <div id="petStatsView" style="display:none"></div>
 </div>
 
 <button class="fab" id="fabAdd">＋</button>
@@ -291,9 +351,24 @@
         <input type="number" id="qtyInput2" min="0" value="0">
       </div>
     </div>
-    <label class="photo-input-btn" id="photoLabel">拍照或選擇照片</label>
-    <input type="file" accept="image/*" id="photoInput" style="display:none">
-    <img id="previewImg" class="preview-img">
+    <div id="dateRow" style="display:none">
+      <label class="field-label">日期</label>
+      <input type="date" id="dateInput" class="date-input">
+    </div>
+    <div id="consumeRow" style="display:none">
+      <div class="toggle-group" id="toggleGroup"></div>
+      <div class="qty-field" style="margin-bottom:12px;">
+        <label id="amountLabel">數量 (g)</label>
+        <input type="number" id="amountInput" min="0" value="0">
+      </div>
+      <label class="field-label">日期</label>
+      <input type="date" id="consumeDateInput" class="date-input">
+    </div>
+    <div id="photoSection">
+      <label class="photo-input-btn" id="photoLabel">拍照或選擇照片</label>
+      <input type="file" accept="image/*" id="photoInput" style="display:none">
+      <img id="previewImg" class="preview-img">
+    </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="cancelBtn">取消</button>
       <button class="btn btn-primary" id="saveBtn">加入</button>
@@ -309,12 +384,17 @@ const ICONS = {
   bottle: `<path d="M10 2h4v3.2l1.6 2.4c.4.6.4 1.4 0 2L14 12v6.5A2.5 2.5 0 0 1 11.5 21h-3A2.5 2.5 0 0 1 6 18.5V12L8.4 9.6c.4-.6.4-1.4 0-2L10 5.2V2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 14h8" stroke-width="1.4" stroke-linecap="round"/>`,
   paw: `<circle cx="7" cy="8" r="1.6" stroke-width="1.5"/><circle cx="12" cy="6" r="1.6" stroke-width="1.5"/><circle cx="17" cy="8" r="1.6" stroke-width="1.5"/><path d="M12 12c-3 0-5.5 2-5.5 4.5S8.5 21 12 21s5.5-1.5 5.5-4.5S15 12 12 12z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`,
   basket: `<path d="M4 9h16l-1.4 9.5a2 2 0 0 1-2 1.7H7.4a2 2 0 0 1-2-1.7L4 9z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 12.5v5M12 12.5v5M15 12.5v5" stroke-width="1.4" stroke-linecap="round"/>`,
-  hanger: `<circle cx="12" cy="4.3" r="1.3" stroke-width="1.5"/><path d="M12 5.6v2" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7.6l7.6 5.7a1.3 1.3 0 0 1-.8 2.3H5.2a1.3 1.3 0 0 1-.8-2.3L12 7.6z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 19.5h12" stroke-width="1.4" stroke-linecap="round"/>`
+  hanger: `<circle cx="12" cy="4.3" r="1.3" stroke-width="1.5"/><path d="M12 5.6v2" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7.6l7.6 5.7a1.3 1.3 0 0 1-.8 2.3H5.2a1.3 1.3 0 0 1-.8-2.3L12 7.6z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 19.5h12" stroke-width="1.4" stroke-linecap="round"/>`,
+  calendar: `<rect x="3" y="4" width="18" height="17" rx="2" stroke-width="1.6"/><line x1="3" y1="9" x2="21" y2="9" stroke-width="1.4"/><line x1="8" y1="2" x2="8" y2="6" stroke-width="1.6" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" stroke-width="1.6" stroke-linecap="round"/>`,
+  droplet: `<path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  bowl: `<path d="M3 12h18a9 6 0 0 1-18 0z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 12V9a4 4 0 0 1 8 0v3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  rabbit: `<circle cx="12" cy="14" r="5.5" stroke-width="1.6"/><path d="M9 9.5c-1-3.5-1-7 .3-7s1.7 3.5 1 7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9.5c1-3.5 1-7-.3-7s-1.7 3.5-1 7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10.2" cy="13.5" r="0.5" stroke-width="1"/><circle cx="13.8" cy="13.5" r="0.5" stroke-width="1"/>`,
+  grass: `<path d="M12 21V11" stroke-width="1.6" stroke-linecap="round"/><path d="M12 13c0-4.5-3.2-6.5-3.2-6.5s-.3 4.5 3.2 6.5z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 15c0-4.5 3.2-7 3.2-7s.3 4.5-3.2 7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`
 };
 
 const MODULES = {
   supplies: {
-    name: '生活物資', placeholder: '例如：衛生紙、洗衣精',
+    name: '生活物資', placeholder: '例如：吉伊卡哇擦手紙',
     homeIcon: 'box', color: '#C9A24B',
     type: 'inventory',
     counters: [
@@ -334,7 +414,7 @@ const MODULES = {
     hasDryTimer: true
   },
   skincare: {
-    name: '保養品', placeholder: '例如：維他命C精華液',
+    name: '保養品', placeholder: '例如：護膚的水',
     homeIcon: 'bottle', color: '#B87FA0',
     statuses: [
       { key:'unopened', label:'未拆封', color:'#6B9B6E' },
@@ -344,14 +424,13 @@ const MODULES = {
     defaultStatus: 'unopened'
   },
   pets: {
-    name: '寵物用品', placeholder: '例如：狗糧、貓砂',
+    name: '雪球專區', placeholder: '例如：NP、創世紀',
     homeIcon: 'paw', color: '#8A9B6E',
-    statuses: [
-      { key:'low', label:'快用完', color:'#C97D4B' },
-      { key:'ok', label:'夠用', color:'#4F8CA6' },
-      { key:'stocked', label:'庫存充足', color:'#6B9B6E' }
-    ],
-    defaultStatus: 'stocked'
+    type: 'pet',
+    counters: [
+      { key:'inUse', label:'正在使用' },
+      { key:'stock', label:'庫存數量' }
+    ]
   }
 };
 
@@ -359,6 +438,24 @@ let currentModule = null;
 let currentStatus = null;
 let pendingPhotoDataUrl = null;
 let db;
+
+const CTYPES = [
+  { key:'grass', label:'草', unit:'窩', color:'#8BAA5C', icon:'grass', emoji:'🌿' },
+  { key:'feed', label:'飼料', unit:'碗', color:'#C97D4B', icon:'bowl', emoji:'🥣' },
+  { key:'water', label:'水', unit:'ml', color:'#4F8CA6', icon:'droplet', emoji:'💧' }
+];
+
+let petSubTab = 'stock';
+let modalMode = 'status';
+let currentCType = CTYPES[0].key;
+let calMonth = new Date();
+calMonth.setDate(1);
+let selectedDate = todayStr();
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 // ---------- IndexedDB ----------
 function openDB(){
@@ -405,14 +502,30 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
+function refresh(){
+  const m = MODULES[currentModule];
+  if(!m) return;
+  if(m.type === 'pet'){ renderPetView(); }
+  else { renderTabs(); renderGrid(); }
+}
+
 // ---------- Home ----------
 async function renderHome(){
   const items = await getAllItems();
   const counts = {};
   const restockCounts = {};
+
   items.forEach(it => {
+    const conf = MODULES[it.module];
+    if(conf && conf.type === 'pet'){
+      if(it.recordType === 'stock'){
+        counts[it.module] = (counts[it.module]||0) + 1;
+        if((it.stock||0) === 0) restockCounts[it.module] = (restockCounts[it.module]||0) + 1;
+      }
+      return;
+    }
     counts[it.module] = (counts[it.module]||0) + 1;
-    if(MODULES[it.module] && MODULES[it.module].type === 'inventory' && (it.stock||0) === 0){
+    if(conf && conf.type === 'inventory' && (it.stock||0) === 0){
       restockCounts[it.module] = (restockCounts[it.module]||0) + 1;
     }
   });
@@ -445,11 +558,24 @@ document.getElementById('moduleGrid').addEventListener('click', (e) => {
 function openModule(id){
   currentModule = id;
   const m = MODULES[id];
-  currentStatus = m.type === 'inventory' ? null : m.statuses[0].key;
+
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('moduleView').classList.add('active');
   document.getElementById('moduleTitle').textContent = m.name;
+
+  if(m.type === 'pet'){
+    petSubTab = 'stock';
+    renderPetTabs();
+    renderPetView();
+    return;
+  }
+
+  document.getElementById('petCalendarView').style.display = 'none';
+  document.getElementById('petStatsView').style.display = 'none';
+  document.getElementById('grid').style.display = 'grid';
+  document.getElementById('banner').style.display = 'block';
   document.getElementById('tabs').style.display = m.type === 'inventory' ? 'none' : 'flex';
+  currentStatus = m.type === 'inventory' ? null : m.statuses[0].key;
   renderTabs();
   renderGrid();
 }
@@ -476,6 +602,12 @@ function renderTabs(){
 document.getElementById('tabs').addEventListener('click', (e) => {
   const tab = e.target.closest('.tab');
   if(!tab) return;
+  if(tab.dataset.pettab){
+    petSubTab = tab.dataset.pettab;
+    renderPetTabs();
+    renderPetView();
+    return;
+  }
   currentStatus = tab.dataset.status;
   renderTabs();
   renderGrid();
@@ -494,7 +626,6 @@ async function renderGrid(){
   const items = await getAllItems();
   const moduleItems = items.filter(it => it.module === currentModule);
   const grid = document.getElementById('grid');
-
   const bannerEl = document.getElementById('banner');
 
   if(m.type === 'inventory'){
@@ -515,27 +646,7 @@ async function renderGrid(){
         ${outOfStock.map(it => escapeHtml(it.name)).join('、')}
       </div>` : '';
 
-    grid.innerHTML = sorted.map(item => `
-      <div class="card inv-card" data-id="${item.id}">
-        <div class="photo-wrap">
-          <img src="${item.photo}" alt="${escapeHtml(item.name)}">
-        </div>
-        <div class="info">
-          <p class="name">${escapeHtml(item.name)}</p>
-          ${m.counters.map(c => `
-            <div class="counter-row">
-              <span class="clabel">${c.label}</span>
-              <div class="counter-controls">
-                <button class="counter-btn" data-counter="${c.key}" data-delta="-1">−</button>
-                <span class="counter-value ${c.key==='stock' && (item[c.key]||0) === 0 ? 'zero-stock' : ''}" id="val-${item.id}-${c.key}">${item[c.key] || 0}</span>
-                <button class="counter-btn" data-counter="${c.key}" data-delta="1">＋</button>
-              </div>
-            </div>
-          `).join('')}
-          <button class="del-btn" data-del="1">刪除</button>
-        </div>
-      </div>
-    `).join('');
+    grid.innerHTML = sorted.map(item => renderInventoryCard(item, m)).join('');
     return;
   }
   bannerEl.innerHTML = '';
@@ -581,19 +692,42 @@ async function renderGrid(){
   }).join('');
 }
 
+function renderInventoryCard(item, m){
+  return `
+    <div class="card inv-card" data-id="${item.id}">
+      <div class="photo-wrap">
+        <img src="${item.photo}" alt="${escapeHtml(item.name)}">
+      </div>
+      <div class="info">
+        <p class="name">${escapeHtml(item.name)}</p>
+        ${m.counters.map(c => `
+          <div class="counter-row">
+            <span class="clabel">${c.label}</span>
+            <div class="counter-controls">
+              <button class="counter-btn" data-counter="${c.key}" data-delta="-1">−</button>
+              <span class="counter-value ${c.key==='stock' && (item[c.key]||0) === 0 ? 'zero-stock' : ''}" id="val-${item.id}-${c.key}">${item[c.key] || 0}</span>
+              <button class="counter-btn" data-counter="${c.key}" data-delta="1">＋</button>
+            </div>
+          </div>
+        `).join('')}
+        <button class="del-btn" data-del="1">刪除</button>
+      </div>
+    </div>
+  `;
+}
+
 function notifyRestock(name){
   try{
     if(!('Notification' in window)) return;
     const fire = () => {
-      try{ new Notification('該補貨囉', { body: `${name} 庫存已經用完了`, icon: undefined }); }
-      catch(e){ /* some browsers require a service worker for notifications; fail silently */ }
+      try{ new Notification('該補貨囉', { body: `${name} 庫存已經用完了` }); }
+      catch(e){}
     };
-    if(Notification.permission === 'granted'){
-      fire();
-    } else if(Notification.permission !== 'denied'){
+    if(Notification.permission === 'granted'){ fire(); }
+    else if(Notification.permission !== 'denied'){
       Notification.requestPermission().then(p => { if(p === 'granted') fire(); });
     }
-  } catch(e){ /* Notification API unsupported in this context */ }
+  } catch(e){}
 }
 
 document.getElementById('grid').addEventListener('click', async (e) => {
@@ -607,8 +741,7 @@ document.getElementById('grid').addEventListener('click', async (e) => {
     item.status = e.target.dataset.move;
     item.lastStatusChange = Date.now();
     await putItem(item);
-    renderTabs();
-    renderGrid();
+    refresh();
   }
   if(e.target.dataset.counter){
     const key = e.target.dataset.counter;
@@ -621,7 +754,7 @@ document.getElementById('grid').addEventListener('click', async (e) => {
 
     if(key === 'stock' && before > 0 && item[key] === 0){
       notifyRestock(item.name);
-      renderGrid();
+      refresh();
     } else {
       const valEl = document.getElementById(`val-${id}-${key}`);
       if(valEl){
@@ -633,8 +766,217 @@ document.getElementById('grid').addEventListener('click', async (e) => {
   if(e.target.dataset.del){
     if(confirm('確定要刪除這個項目嗎？')){
       await deleteItemDB(id);
-      renderTabs();
-      renderGrid();
+      refresh();
+    }
+  }
+});
+
+// ---------- Pet module ----------
+function renderPetTabs(){
+  const subtabs = [
+    { key:'stock', label:'庫存', color:'#6B9B6E' },
+    { key:'calendar', label:'採購紀錄', color:'#C97D4B' },
+    { key:'stats', label:'飲食紀錄', color:'#4F8CA6' }
+  ];
+  const tabs = document.getElementById('tabs');
+  tabs.style.display = 'flex';
+  tabs.innerHTML = subtabs.map(s => `
+    <button class="tab ${s.key === petSubTab ? 'active' : ''}" data-pettab="${s.key}">
+      ${s.label}
+      <span class="underline" style="background:${s.key === petSubTab ? s.color : 'transparent'}"></span>
+    </button>
+  `).join('');
+}
+
+function renderPetView(){
+  const grid = document.getElementById('grid');
+  const bannerEl = document.getElementById('banner');
+  const calEl = document.getElementById('petCalendarView');
+  const statsEl = document.getElementById('petStatsView');
+
+  grid.style.display = petSubTab === 'stock' ? 'grid' : 'none';
+  bannerEl.style.display = petSubTab === 'stock' ? 'block' : 'none';
+  calEl.style.display = petSubTab === 'calendar' ? 'block' : 'none';
+  statsEl.style.display = petSubTab === 'stats' ? 'block' : 'none';
+
+  if(petSubTab === 'stock') renderPetStock();
+  else if(petSubTab === 'calendar') renderPetCalendar();
+  else renderPetStats();
+}
+
+async function renderPetStock(){
+  const m = MODULES.pets;
+  const items = await getAllItems();
+  const stockItems = items.filter(it => it.module === 'pets' && it.recordType === 'stock');
+  const grid = document.getElementById('grid');
+  const bannerEl = document.getElementById('banner');
+
+  if(stockItems.length === 0){
+    bannerEl.innerHTML = '';
+    grid.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24">${ICONS.rabbit}</svg>
+      還沒有用品紀錄<br>點右下角「＋」新增一項
+    </div>`;
+    return;
+  }
+
+  const sorted = [...stockItems].sort((a,b) => (a.stock||0) === 0 && (b.stock||0) !== 0 ? -1 : (b.stock||0) === 0 && (a.stock||0) !== 0 ? 1 : 0);
+  const outOfStock = stockItems.filter(it => (it.stock||0) === 0);
+  bannerEl.innerHTML = outOfStock.length > 0 ? `
+    <div class="restock-banner">
+      <b>⚠️ ${outOfStock.length} 項需要補貨</b>
+      ${outOfStock.map(it => escapeHtml(it.name)).join('、')}
+    </div>` : '';
+
+  grid.innerHTML = sorted.map(item => renderInventoryCard(item, m)).join('');
+}
+
+function renderPetCalendar(){
+  getAllItems().then(items => {
+    const purchases = items.filter(it => it.module === 'pets' && it.recordType === 'purchase');
+
+    const year = calMonth.getFullYear();
+    const month = calMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startOffset = firstDay.getDay();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const todayS = todayStr();
+    const purchaseDates = new Set(purchases.map(p => p.date));
+
+    let cells = '';
+    for(let i=0;i<startOffset;i++) cells += `<div class="cal-cell empty"></div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday = dateStr === todayS;
+      const isSelected = dateStr === selectedDate;
+      cells += `<button class="cal-cell ${isToday?'today':''} ${isSelected?'selected':''}" data-date="${dateStr}">
+        ${d}${purchaseDates.has(dateStr) ? '<span class="cal-dot"></span>' : ''}
+      </button>`;
+    }
+
+    const dow = ['日','一','二','三','四','五','六'];
+    const dayPurchases = purchases.filter(p => p.date === selectedDate);
+    const listHtml = dayPurchases.length === 0
+      ? `<div class="empty" style="padding:30px 20px;"><svg viewBox="0 0 24 24">${ICONS.calendar}</svg>這天沒有採購紀錄</div>`
+      : `<div class="purchase-list">` + dayPurchases.map(p => `
+          <div class="purchase-row" data-id="${p.id}">
+            ${p.photo ? `<img src="${p.photo}">` : `<div style="width:48px;height:48px;border-radius:8px;background:#F1ECE2;flex-shrink:0;"></div>`}
+            <div class="pinfo">
+              <p class="pname">${escapeHtml(p.name)}</p>
+              <p class="pdate">${p.date}</p>
+            </div>
+            <button class="del-btn" data-del-purchase="1">刪除</button>
+          </div>
+        `).join('') + `</div>`;
+
+    document.getElementById('petCalendarView').innerHTML = `
+      <div class="cal-nav">
+        <button data-cal="prev">‹</button>
+        <span class="cal-label">${year} 年 ${month+1} 月</span>
+        <button data-cal="next">›</button>
+      </div>
+      <div class="cal-grid">
+        ${dow.map(d => `<div class="cal-dow">${d}</div>`).join('')}
+        ${cells}
+      </div>
+      ${listHtml}
+    `;
+  });
+}
+
+document.getElementById('petCalendarView').addEventListener('click', async (e) => {
+  const navBtn = e.target.closest('[data-cal]');
+  if(navBtn){
+    const dir = navBtn.dataset.cal === 'prev' ? -1 : 1;
+    calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+dir, 1);
+    renderPetCalendar();
+    return;
+  }
+  const cell = e.target.closest('.cal-cell');
+  if(cell && cell.dataset.date){
+    selectedDate = cell.dataset.date;
+    renderPetCalendar();
+    return;
+  }
+  const delBtn = e.target.closest('[data-del-purchase]');
+  if(delBtn){
+    const row = e.target.closest('.purchase-row');
+    if(confirm('確定要刪除這筆採購紀錄嗎？')){
+      await deleteItemDB(row.dataset.id);
+      renderPetCalendar();
+    }
+  }
+});
+
+async function renderPetStats(){
+  const items = await getAllItems();
+  const logs = items.filter(it => it.module === 'pets' && it.recordType === 'consumption');
+  const todayS = todayStr();
+
+  const todayTotals = CTYPES.map(c => ({
+    ...c,
+    total: logs.filter(l => l.date === todayS && l.ctype === c.key).reduce((s,l)=>s+(l.amount||0),0)
+  }));
+
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date();
+    d.setDate(d.getDate()-i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const totals = CTYPES.map(c => ({
+      ...c,
+      total: logs.filter(l => l.date === ds && l.ctype === c.key).reduce((s,l)=>s+(l.amount||0),0)
+    }));
+    days.push({ label: `${d.getMonth()+1}/${d.getDate()}`, totals });
+  }
+  const maxByType = {};
+  CTYPES.forEach(c => { maxByType[c.key] = Math.max(1, ...days.map(d => d.totals.find(t=>t.key===c.key).total)); });
+
+  const recent = logs.slice(0, 8);
+
+  document.getElementById('petStatsView').innerHTML = `
+    <div class="stat-wrap">
+      <div class="stat-summary">
+        ${todayTotals.map(t => `
+          <div class="stat-card">
+            <div class="icon-wrap" style="background:${t.color}"><svg viewBox="0 0 24 24">${ICONS[t.icon]}</svg></div>
+            <div class="svalue">${t.total}${t.unit}</div>
+            <div class="slabel">今天${t.label}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="log-title">近 7 天趨勢</div>
+      ${days.map(d => `
+        <div class="bar-day">
+          <div class="bd-label"><span>${d.label}</span><span>${d.totals.map(t=>`${t.label} ${t.total}${t.unit}`).join('・')}</span></div>
+          ${d.totals.map(t => `<div class="bar-track"><div class="bar-fill" style="width:${(t.total/maxByType[t.key]*100).toFixed(0)}%;background:${t.color}"></div></div>`).join('')}
+        </div>
+      `).join('')}
+
+      <div class="log-title">最近紀錄</div>
+      ${recent.length === 0 ? `<div class="empty" style="padding:30px 0;"><svg viewBox="0 0 24 24">${ICONS.bowl}</svg>還沒有餵食紀錄</div>` :
+        recent.map(l => {
+          const conf = CTYPES.find(c => c.key === l.ctype) || { label:l.ctype, unit:'', emoji:'📝' };
+          return `
+          <div class="log-row" data-id="${l.id}">
+            <span>${conf.emoji} ${conf.label} ${l.amount}${conf.unit}</span>
+            <span class="ltime">${l.date} <button class="del-btn" data-del-log="1">刪除</button></span>
+          </div>
+        `;
+        }).join('')
+      }
+    </div>
+  `;
+}
+
+document.getElementById('petStatsView').addEventListener('click', async (e) => {
+  const delBtn = e.target.closest('[data-del-log]');
+  if(delBtn){
+    const row = e.target.closest('.log-row');
+    if(confirm('確定要刪除這筆紀錄嗎？')){
+      await deleteItemDB(row.dataset.id);
+      renderPetStats();
     }
   }
 });
@@ -648,22 +990,60 @@ const nameInput = document.getElementById('nameInput');
 document.getElementById('fabAdd').addEventListener('click', () => {
   if(!currentModule){ alert('請先選擇一個分類'); return; }
   const m = MODULES[currentModule];
-  document.getElementById('modalTitle').textContent = `新增${m.name}`;
-  nameInput.placeholder = m.placeholder;
-  nameInput.value = '';
+
   previewImg.style.display = 'none';
   previewImg.src = '';
   pendingPhotoDataUrl = null;
+  nameInput.value = '';
+  nameInput.style.display = 'block';
+  document.getElementById('qtyRow').style.display = 'none';
+  document.getElementById('dateRow').style.display = 'none';
+  document.getElementById('consumeRow').style.display = 'none';
+  document.getElementById('photoSection').style.display = 'block';
 
-  const qtyRow = document.getElementById('qtyRow');
-  if(m.type === 'inventory'){
-    qtyRow.style.display = 'flex';
+  if(m.type === 'pet'){
+    if(petSubTab === 'stock'){
+      modalMode = 'inventory';
+      document.getElementById('modalTitle').textContent = '新增雪球用品';
+      nameInput.placeholder = m.placeholder;
+      document.getElementById('qtyRow').style.display = 'flex';
+      document.getElementById('qtyLabel1').textContent = m.counters[0].label;
+      document.getElementById('qtyLabel2').textContent = m.counters[1].label;
+      document.getElementById('qtyInput1').value = 1;
+      document.getElementById('qtyInput2').value = 0;
+    } else if(petSubTab === 'calendar'){
+      modalMode = 'purchase';
+      document.getElementById('modalTitle').textContent = '新增採購紀錄';
+      nameInput.placeholder = '例如：NP 主食、木屑墊料';
+      document.getElementById('dateRow').style.display = 'block';
+      document.getElementById('dateInput').value = selectedDate;
+    } else {
+      modalMode = 'consumption';
+      document.getElementById('modalTitle').textContent = '新增飲食紀錄';
+      nameInput.style.display = 'none';
+      document.getElementById('photoSection').style.display = 'none';
+      document.getElementById('consumeRow').style.display = 'block';
+      document.getElementById('consumeDateInput').value = todayStr();
+      document.getElementById('amountInput').value = 0;
+      currentCType = CTYPES[0].key;
+      document.getElementById('toggleGroup').innerHTML = CTYPES.map((c,i) => `
+        <button type="button" class="toggle-btn ${i===0?'active':''}" data-ctype="${c.key}">${c.label}</button>
+      `).join('');
+      document.getElementById('amountLabel').textContent = `數量 (${CTYPES[0].unit})`;
+    }
+  } else if(m.type === 'inventory'){
+    modalMode = 'inventory';
+    document.getElementById('modalTitle').textContent = `新增${m.name}`;
+    nameInput.placeholder = m.placeholder;
+    document.getElementById('qtyRow').style.display = 'flex';
     document.getElementById('qtyLabel1').textContent = m.counters[0].label;
     document.getElementById('qtyLabel2').textContent = m.counters[1].label;
     document.getElementById('qtyInput1').value = 1;
     document.getElementById('qtyInput2').value = 0;
   } else {
-    qtyRow.style.display = 'none';
+    modalMode = 'status';
+    document.getElementById('modalTitle').textContent = `新增${m.name}`;
+    nameInput.placeholder = m.placeholder;
   }
 
   modalOverlay.classList.add('open');
@@ -685,9 +1065,55 @@ photoInput.addEventListener('change', () => {
   reader.readAsDataURL(file);
 });
 
+document.getElementById('consumeRow').addEventListener('click', (e) => {
+  const btn = e.target.closest('.toggle-btn');
+  if(!btn) return;
+  currentCType = btn.dataset.ctype;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.toggle('active', b === btn));
+  const conf = CTYPES.find(c => c.key === currentCType);
+  document.getElementById('amountLabel').textContent = `數量 (${conf.unit})`;
+});
+
 document.getElementById('saveBtn').addEventListener('click', async () => {
+  if(modalMode === 'consumption'){
+    const amount = parseInt(document.getElementById('amountInput').value, 10) || 0;
+    if(amount <= 0){ alert('請輸入大於 0 的數量'); return; }
+    const date = document.getElementById('consumeDateInput').value || todayStr();
+    const item = {
+      id: Date.now().toString(),
+      module: 'pets',
+      recordType: 'consumption',
+      ctype: currentCType,
+      amount,
+      date,
+      dateAdded: Date.now()
+    };
+    await putItem(item);
+    modalOverlay.classList.remove('open');
+    refresh();
+    return;
+  }
+
   const name = nameInput.value.trim();
   if(!name){ alert('請輸入名稱'); return; }
+
+  if(modalMode === 'purchase'){
+    const date = document.getElementById('dateInput').value || todayStr();
+    const item = {
+      id: Date.now().toString(),
+      module: 'pets',
+      recordType: 'purchase',
+      name,
+      photo: pendingPhotoDataUrl || null,
+      date,
+      dateAdded: Date.now()
+    };
+    await putItem(item);
+    modalOverlay.classList.remove('open');
+    refresh();
+    return;
+  }
+
   if(!pendingPhotoDataUrl){ alert('請先拍照或選擇照片'); return; }
 
   const m = MODULES[currentModule];
@@ -700,9 +1126,10 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     lastStatusChange: Date.now()
   };
 
-  if(m.type === 'inventory'){
+  if(modalMode === 'inventory'){
     item[m.counters[0].key] = parseInt(document.getElementById('qtyInput1').value, 10) || 0;
     item[m.counters[1].key] = parseInt(document.getElementById('qtyInput2').value, 10) || 0;
+    if(m.type === 'pet') item.recordType = 'stock';
   } else {
     item.status = m.defaultStatus;
     currentStatus = m.defaultStatus;
@@ -710,15 +1137,14 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 
   await putItem(item);
   modalOverlay.classList.remove('open');
-  renderTabs();
-  renderGrid();
+  refresh();
 });
 
 // ---------- Init ----------
 (async function init(){
   db = await openDB();
   renderHome();
-  setInterval(() => { if(currentModule) renderGrid(); }, 60000);
+  setInterval(() => { if(currentModule) refresh(); }, 60000);
 })();
 </script>
 </body>
