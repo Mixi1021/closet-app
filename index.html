@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="衣櫃">
+<title>我的衣櫃</title>
+<style>
+  :root{
+    --bg: #FAF7F1;
+    --ink: #2B2620;
+    --ink-soft: #8A8074;
+    --line: #E7E0D2;
+    --card: #FFFFFF;
+    --dirty: #C97D4B;
+    --drying: #4F8CA6;
+    --clean: #6B9B6E;
+    --shadow: 0 2px 10px rgba(43,38,32,0.06);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior-y: none;
+  }
+  .header{
+    padding: 22px 20px 6px;
+  }
+  .header h1{
+    font-family: Georgia, "Noto Serif TC", serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 2px;
+    letter-spacing: 0.2px;
+  }
+  .header p{
+    margin:0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* status tabs styled like tags on a line */
+  .tabs{
+    display:flex;
+    gap: 8px;
+    padding: 16px 20px 4px;
+    position: relative;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding: 10px 4px 12px;
+    border: none;
+    background: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    position: relative;
+    cursor: pointer;
+  }
+  .tab .dot{
+    display:block;
+    width:6px; height:6px;
+    border-radius:50%;
+    margin: 0 auto 6px;
+    background: var(--line);
+    transition: all .2s ease;
+  }
+  .tab.active{ color: var(--ink); }
+  .tab.active .dot{ width:16px; border-radius: 3px; }
+  .tab[data-status="dirty"].active .dot{ background: var(--dirty); }
+  .tab[data-status="drying"].active .dot{ background: var(--drying); }
+  .tab[data-status="clean"].active .dot{ background: var(--clean); }
+
+  .count{
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 12px 20px 100px;
+  }
+
+  .card{
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+  }
+  .card .photo-wrap{
+    position: relative;
+    aspect-ratio: 1/1;
+    background: #F1ECE2;
+  }
+  .card img{
+    width:100%; height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .card .tag{
+    position:absolute;
+    top:8px; left:8px;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+  }
+  .tag.dirty{ background: var(--dirty); }
+  .tag.drying{ background: var(--drying); }
+  .tag.clean{ background: var(--clean); }
+
+  .card .info{ padding: 10px 12px 12px; }
+  .card .name{
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .move-row{ display:flex; gap:6px; flex-wrap: wrap; }
+  .move-btn{
+    font-size: 11px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+    padding: 5px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .del-btn{
+    margin-top: 8px;
+    font-size: 11px;
+    color: #B85C5C;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .empty{
+    grid-column: 1 / -1;
+    text-align:center;
+    color: var(--ink-soft);
+    padding: 60px 20px;
+    font-size: 14px;
+  }
+
+  .fab{
+    position: fixed;
+    right: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: white;
+    border: none;
+    font-size: 28px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* modal */
+  .modal-overlay{
+    position: fixed; inset:0;
+    background: rgba(43,38,32,0.4);
+    display:none;
+    align-items: flex-end;
+    z-index: 50;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    background: var(--bg);
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
+  }
+  .modal h2{
+    font-family: Georgia, "Noto Serif TC", serif;
+    font-size: 19px;
+    margin: 4px 0 16px;
+  }
+  .modal input[type=text]{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: white;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .photo-input-btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1.5px dashed var(--line);
+    color: var(--ink-soft);
+    font-size: 14px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    background: white;
+  }
+  .preview-img{
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    display:none;
+  }
+  .modal-actions{ display:flex; gap: 10px; }
+  .btn{
+    flex:1;
+    padding: 13px;
+    border-radius: 10px;
+    border:none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary{ background: var(--ink); color:white; }
+  .btn-secondary{ background: var(--line); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>我的衣櫃</h1>
+  <p id="subtitle">整理待洗、曬衣、乾淨的衣物</p>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-status="dirty"><span class="dot"></span>待洗 <span class="count" id="count-dirty"></span></button>
+  <button class="tab" data-status="drying"><span class="dot"></span>曬衣中 <span class="count" id="count-drying"></span></button>
+  <button class="tab" data-status="clean"><span class="dot"></span>衣櫃 <span class="count" id="count-clean"></span></button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<button class="fab" id="fabAdd">＋</button>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>新增衣物</h2>
+    <input type="text" id="nameInput" placeholder="例如：藍色格紋襯衫">
+    <label class="photo-input-btn" id="photoLabel">拍照或選擇照片</label>
+    <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none">
+    <img id="previewImg" class="preview-img">
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelBtn">取消</button>
+      <button class="btn btn-primary" id="saveBtn">加入衣櫃</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATUS_LABEL = { dirty: '待洗', drying: '曬衣中', clean: '衣櫃' };
+let currentStatus = 'dirty';
+let pendingPhotoDataUrl = null;
+let db;
+
+// ---------- IndexedDB ----------
+function openDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('ClosetAppDB', 1);
+    req.onupgradeneeded = (e) => {
+      const database = e.target.result;
+      if(!database.objectStoreNames.contains('items')){
+        database.createObjectStore('items', { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = (e) => reject(e);
+  });
+}
+
+function getAllItems(){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('items', 'readonly');
+    const store = tx.objectStore('items');
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result.sort((a,b) => b.dateAdded - a.dateAdded));
+    req.onerror = (e) => reject(e);
+  });
+}
+
+function putItem(item){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('items', 'readwrite');
+    tx.objectStore('items').put(item);
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
+}
+
+function deleteItemDB(id){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('items', 'readwrite');
+    tx.objectStore('items').delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
+}
+
+// ---------- Rendering ----------
+async function render(){
+  const items = await getAllItems();
+  const counts = { dirty:0, drying:0, clean:0 };
+  items.forEach(it => counts[it.status]++);
+  document.getElementById('count-dirty').textContent = counts.dirty || '';
+  document.getElementById('count-drying').textContent = counts.drying || '';
+  document.getElementById('count-clean').textContent = counts.clean || '';
+
+  const grid = document.getElementById('grid');
+  const filtered = items.filter(it => it.status === currentStatus);
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="empty">這裡還沒有衣物<br>點右下角「＋」新增一件</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(item => `
+    <div class="card" data-id="${item.id}">
+      <div class="photo-wrap">
+        <img src="${item.photo}" alt="${escapeHtml(item.name)}">
+        <span class="tag ${item.status}">${STATUS_LABEL[item.status]}</span>
+      </div>
+      <div class="info">
+        <p class="name">${escapeHtml(item.name)}</p>
+        <div class="move-row">
+          ${Object.keys(STATUS_LABEL).filter(s => s !== item.status).map(s =>
+            `<button class="move-btn" data-move="${s}">→ ${STATUS_LABEL[s]}</button>`
+          ).join('')}
+        </div>
+        <button class="del-btn" data-del="1">刪除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ---------- Events ----------
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const tab = e.target.closest('.tab');
+  if(!tab) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentStatus = tab.dataset.status;
+  render();
+});
+
+document.getElementById('grid').addEventListener('click', async (e) => {
+  const card = e.target.closest('.card');
+  if(!card) return;
+  const id = card.dataset.id;
+
+  if(e.target.dataset.move){
+    const items = await getAllItems();
+    const item = items.find(it => it.id === id);
+    item.status = e.target.dataset.move;
+    await putItem(item);
+    render();
+  }
+  if(e.target.dataset.del){
+    if(confirm('確定要刪除這件衣物嗎？')){
+      await deleteItemDB(id);
+      render();
+    }
+  }
+});
+
+const modalOverlay = document.getElementById('modalOverlay');
+const photoInput = document.getElementById('photoInput');
+const previewImg = document.getElementById('previewImg');
+const nameInput = document.getElementById('nameInput');
+
+document.getElementById('fabAdd').addEventListener('click', () => {
+  nameInput.value = '';
+  previewImg.style.display = 'none';
+  previewImg.src = '';
+  pendingPhotoDataUrl = null;
+  modalOverlay.classList.add('open');
+});
+
+document.getElementById('cancelBtn').addEventListener('click', () => {
+  modalOverlay.classList.remove('open');
+});
+
+document.getElementById('photoLabel').addEventListener('click', () => {
+  photoInput.click();
+});
+
+photoInput.addEventListener('change', () => {
+  const file = photoInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pendingPhotoDataUrl = e.target.result;
+    previewImg.src = pendingPhotoDataUrl;
+    previewImg.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  if(!name){ alert('請輸入衣物名稱'); return; }
+  if(!pendingPhotoDataUrl){ alert('請先拍照或選擇照片'); return; }
+
+  const item = {
+    id: Date.now().toString(),
+    name,
+    status: 'dirty',
+    photo: pendingPhotoDataUrl,
+    dateAdded: Date.now()
+  };
+  await putItem(item);
+  modalOverlay.classList.remove('open');
+  currentStatus = 'dirty';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab[data-status="dirty"]').classList.add('active');
+  render();
+});
+
+// ---------- Init ----------
+(async function init(){
+  db = await openDB();
+  render();
+})();
+</script>
+</body>
+</html>
