@@ -172,6 +172,30 @@
     border: 1px solid var(--line); background: white; font-size: 15px;
   }
 
+  .restock-banner{
+    margin: 14px 20px 0;
+    padding: 12px 14px;
+    background: #FBEDE3;
+    border: 1px solid #F0CDAF;
+    border-radius: 12px;
+    color: #A85A2E;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .restock-banner b{ display:block; font-size: 13px; margin-bottom: 3px; }
+
+  .module-card{ position: relative; }
+  .badge{
+    position: absolute;
+    top: 12px; right: 12px;
+    background: #C97D4B;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
   .empty{
     grid-column: 1 / -1; text-align:center; color: var(--ink-soft);
     padding: 50px 20px; font-size: 14px;
@@ -247,6 +271,7 @@
     <h2 id="moduleTitle"></h2>
   </div>
   <div class="tabs" id="tabs"></div>
+  <div id="banner"></div>
   <div class="grid" id="grid"></div>
 </div>
 
@@ -384,14 +409,22 @@ function escapeHtml(str){
 async function renderHome(){
   const items = await getAllItems();
   const counts = {};
-  items.forEach(it => { counts[it.module] = (counts[it.module]||0) + 1; });
+  const restockCounts = {};
+  items.forEach(it => {
+    counts[it.module] = (counts[it.module]||0) + 1;
+    if(MODULES[it.module] && MODULES[it.module].type === 'inventory' && (it.stock||0) === 0){
+      restockCounts[it.module] = (restockCounts[it.module]||0) + 1;
+    }
+  });
 
   const grid = document.getElementById('moduleGrid');
   grid.innerHTML = Object.keys(MODULES).map(id => {
     const m = MODULES[id];
     const n = counts[id] || 0;
+    const r = restockCounts[id] || 0;
     return `
       <button class="module-card" data-module="${id}">
+        ${r > 0 ? `<span class="badge">${r} 項要補貨</span>` : ''}
         <div class="icon-wrap" style="background:${m.color}">
           <svg viewBox="0 0 24 24">${ICONS[m.homeIcon]}</svg>
         </div>
@@ -462,15 +495,27 @@ async function renderGrid(){
   const moduleItems = items.filter(it => it.module === currentModule);
   const grid = document.getElementById('grid');
 
+  const bannerEl = document.getElementById('banner');
+
   if(m.type === 'inventory'){
     if(moduleItems.length === 0){
+      bannerEl.innerHTML = '';
       grid.innerHTML = `<div class="empty">
         <svg viewBox="0 0 24 24">${ICONS[m.homeIcon]}</svg>
         還沒有物資紀錄<br>點右下角「＋」新增一項
       </div>`;
       return;
     }
-    grid.innerHTML = moduleItems.map(item => `
+
+    const sorted = [...moduleItems].sort((a,b) => (a.stock||0) === 0 && (b.stock||0) !== 0 ? -1 : (b.stock||0) === 0 && (a.stock||0) !== 0 ? 1 : 0);
+    const outOfStock = moduleItems.filter(it => (it.stock||0) === 0);
+    bannerEl.innerHTML = outOfStock.length > 0 ? `
+      <div class="restock-banner">
+        <b>⚠️ ${outOfStock.length} 項需要補貨</b>
+        ${outOfStock.map(it => escapeHtml(it.name)).join('、')}
+      </div>` : '';
+
+    grid.innerHTML = sorted.map(item => `
       <div class="card inv-card" data-id="${item.id}">
         <div class="photo-wrap">
           <img src="${item.photo}" alt="${escapeHtml(item.name)}">
@@ -493,6 +538,7 @@ async function renderGrid(){
     `).join('');
     return;
   }
+  bannerEl.innerHTML = '';
 
   const counts = {};
   moduleItems.forEach(it => { counts[it.status] = (counts[it.status]||0) + 1; });
@@ -535,6 +581,21 @@ async function renderGrid(){
   }).join('');
 }
 
+function notifyRestock(name){
+  try{
+    if(!('Notification' in window)) return;
+    const fire = () => {
+      try{ new Notification('該補貨囉', { body: `${name} 庫存已經用完了`, icon: undefined }); }
+      catch(e){ /* some browsers require a service worker for notifications; fail silently */ }
+    };
+    if(Notification.permission === 'granted'){
+      fire();
+    } else if(Notification.permission !== 'denied'){
+      Notification.requestPermission().then(p => { if(p === 'granted') fire(); });
+    }
+  } catch(e){ /* Notification API unsupported in this context */ }
+}
+
 document.getElementById('grid').addEventListener('click', async (e) => {
   const card = e.target.closest('.card');
   if(!card) return;
@@ -554,12 +615,19 @@ document.getElementById('grid').addEventListener('click', async (e) => {
     const delta = parseInt(e.target.dataset.delta, 10);
     const items = await getAllItems();
     const item = items.find(it => it.id === id);
-    item[key] = Math.max(0, (item[key] || 0) + delta);
+    const before = item[key] || 0;
+    item[key] = Math.max(0, before + delta);
     await putItem(item);
-    const valEl = document.getElementById(`val-${id}-${key}`);
-    if(valEl){
-      valEl.textContent = item[key];
-      valEl.classList.toggle('zero-stock', key === 'stock' && item[key] === 0);
+
+    if(key === 'stock' && before > 0 && item[key] === 0){
+      notifyRestock(item.name);
+      renderGrid();
+    } else {
+      const valEl = document.getElementById(`val-${id}-${key}`);
+      if(valEl){
+        valEl.textContent = item[key];
+        valEl.classList.toggle('zero-stock', key === 'stock' && item[key] === 0);
+      }
     }
   }
   if(e.target.dataset.del){
