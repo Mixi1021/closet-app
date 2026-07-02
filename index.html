@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="衣櫃">
-<title>我的衣櫃</title>
+<meta name="apple-mobile-web-app-title" content="生活管理">
+<title>生活管理</title>
 <style>
   :root{
     --bg: #FAF7F1;
@@ -14,9 +14,9 @@
     --ink-soft: #8A8074;
     --line: #E7E0D2;
     --card: #FFFFFF;
-    --dirty: #C97D4B;
-    --drying: #4F8CA6;
-    --clean: #6B9B6E;
+    --c1: #C97D4B;
+    --c2: #4F8CA6;
+    --c3: #6B9B6E;
     --shadow: 0 2px 10px rgba(43,38,32,0.06);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -30,70 +30,84 @@
     padding-bottom: env(safe-area-inset-bottom);
     overscroll-behavior-y: none;
   }
-  .header{
-    padding: 22px 20px 6px;
-  }
-  .header h1{
+  svg{ display:block; }
+
+  /* ---------- Home ---------- */
+  .home-header{ padding: 26px 20px 4px; }
+  .home-header h1{
     font-family: Georgia, "Noto Serif TC", serif;
-    font-size: 26px;
+    font-size: 27px;
     font-weight: 600;
     margin: 0 0 2px;
-    letter-spacing: 0.2px;
   }
-  .header p{
+  .home-header p{ margin:0; font-size: 13px; color: var(--ink-soft); }
+
+  .module-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 20px;
+  }
+  .module-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 16px;
+    text-align:left;
+    box-shadow: var(--shadow);
+    cursor:pointer;
+  }
+  .module-card .icon-wrap{
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom: 14px;
+  }
+  .module-card svg{ width:22px; height:22px; stroke:white; fill:none; }
+  .module-card h3{ margin: 0 0 3px; font-size: 15px; font-weight: 700; }
+  .module-card .sub{ font-size: 12px; color: var(--ink-soft); }
+
+  /* ---------- Module view ---------- */
+  .module-view{ display:none; }
+  .module-view.active{ display:block; }
+  #homeView.hidden{ display:none; }
+
+  .m-header{
+    display:flex; align-items:center; gap: 10px;
+    padding: 18px 16px 4px;
+  }
+  .back-btn{
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .back-btn svg{ width:16px; height:16px; stroke: var(--ink); }
+  .m-header h2{
+    font-family: Georgia, "Noto Serif TC", serif;
+    font-size: 20px;
     margin:0;
-    font-size: 13px;
-    color: var(--ink-soft);
   }
 
-  /* status tabs styled like tags on a line */
-  .tabs{
-    display:flex;
-    gap: 8px;
-    padding: 16px 20px 4px;
-    position: relative;
-  }
+  .tabs{ display:flex; gap: 8px; padding: 14px 20px 4px; }
   .tab{
-    flex:1;
-    text-align:center;
-    padding: 10px 4px 12px;
-    border: none;
-    background: none;
-    font-size: 14px;
-    font-weight: 600;
+    flex:1; text-align:center;
+    padding: 8px 4px 10px;
+    border:none; background:none;
+    font-size: 13px; font-weight: 600;
     color: var(--ink-soft);
-    position: relative;
-    cursor: pointer;
-  }
-  .tab svg{
-    display:block;
-    width:22px; height:22px;
-    margin: 0 auto 5px;
-    stroke: var(--ink-soft);
-    transition: all .2s ease;
+    cursor:pointer;
   }
   .tab .underline{
-    display:block;
-    width: 0;
-    height: 2.5px;
-    border-radius: 2px;
-    margin: 6px auto 0;
-    transition: all .2s ease;
+    display:block; width:0; height:2.5px; border-radius:2px;
+    margin: 6px auto 0; transition: all .2s ease;
   }
   .tab.active{ color: var(--ink); }
-  .tab.active .underline{ width: 20px; }
-  .tab[data-status="dirty"].active svg{ stroke: var(--dirty); }
-  .tab[data-status="dirty"].active .underline{ background: var(--dirty); }
-  .tab[data-status="drying"].active svg{ stroke: var(--drying); }
-  .tab[data-status="drying"].active .underline{ background: var(--drying); }
-  .tab[data-status="clean"].active svg{ stroke: var(--clean); }
-  .tab[data-status="clean"].active .underline{ background: var(--clean); }
-
-  .count{
-    font-size: 11px;
-    color: var(--ink-soft);
-    font-weight: 400;
-  }
+  .tab.active .underline{ width:20px; }
+  .count{ font-size: 11px; color: var(--ink-soft); font-weight:400; }
 
   .grid{
     display:grid;
@@ -101,7 +115,6 @@
     gap: 14px;
     padding: 12px 20px 100px;
   }
-
   .card{
     background: var(--card);
     border-radius: 16px;
@@ -109,152 +122,81 @@
     box-shadow: var(--shadow);
     border: 1px solid var(--line);
   }
-  .card .photo-wrap{
-    position: relative;
-    aspect-ratio: 1/1;
-    background: #F1ECE2;
-  }
-  .card img{
-    width:100%; height:100%;
-    object-fit: cover;
-    display:block;
-  }
+  .card .photo-wrap{ position: relative; aspect-ratio: 1/1; background: #F1ECE2; }
+  .card img{ width:100%; height:100%; object-fit: cover; display:block; }
   .card .tag{
-    position:absolute;
-    top:8px; left:8px;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    color: white;
-    font-weight: 600;
+    position:absolute; top:8px; left:8px;
+    font-size: 10px; padding: 3px 8px; border-radius: 20px;
+    color: white; font-weight: 600;
   }
-  .tag.dirty{ background: var(--dirty); }
-  .tag.drying{ background: var(--drying); }
-  .tag.clean{ background: var(--clean); }
-
   .card .info{ padding: 10px 12px 12px; }
   .card .name{
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 0 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 14px; font-weight: 600; margin: 0 0 8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  .dry-time{ font-size: 11px; color: var(--ink-soft); margin: -2px 0 8px; }
+  .dry-time.overdue{ color: var(--c1); font-weight: 600; }
   .move-row{ display:flex; gap:6px; flex-wrap: wrap; }
   .move-btn{
-    font-size: 11px;
-    border: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--ink);
-    padding: 5px 8px;
-    border-radius: 8px;
-    cursor: pointer;
+    font-size: 11px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink);
+    padding: 5px 8px; border-radius: 8px; cursor: pointer;
   }
   .del-btn{
-    margin-top: 8px;
-    font-size: 11px;
-    color: #B85C5C;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
+    margin-top: 8px; font-size: 11px; color: #B85C5C;
+    background: none; border: none; padding: 0; cursor: pointer;
   }
-
-  .dry-time{
-    font-size: 11px;
-    color: var(--ink-soft);
-    margin: -2px 0 8px;
-  }
-  .dry-time.overdue{ color: var(--dirty); font-weight: 600; }
 
   .empty{
-    grid-column: 1 / -1;
-    text-align:center;
-    color: var(--ink-soft);
-    padding: 50px 20px;
-    font-size: 14px;
+    grid-column: 1 / -1; text-align:center; color: var(--ink-soft);
+    padding: 50px 20px; font-size: 14px;
   }
-  .empty svg{
-    width: 46px; height: 46px;
-    stroke: var(--line);
-    margin-bottom: 14px;
-  }
+  .empty svg{ width: 44px; height: 44px; stroke: var(--line); margin: 0 auto 14px; }
 
   .fab{
-    position: fixed;
-    right: 20px;
+    position: fixed; right: 20px;
     bottom: calc(24px + env(safe-area-inset-bottom));
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: white;
-    border: none;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--ink); color: white; border: none;
     font-size: 28px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.2);
     cursor: pointer;
     display:flex; align-items:center; justify-content:center;
   }
 
-  /* modal */
   .modal-overlay{
-    position: fixed; inset:0;
-    background: rgba(43,38,32,0.4);
-    display:none;
-    align-items: flex-end;
-    z-index: 50;
+    position: fixed; inset:0; background: rgba(43,38,32,0.4);
+    display:none; align-items: flex-end; z-index: 50;
   }
   .modal-overlay.open{ display:flex; }
   .modal{
-    background: var(--bg);
-    width: 100%;
+    background: var(--bg); width: 100%;
     border-radius: 20px 20px 0 0;
     padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
   }
   .modal h2{
     font-family: Georgia, "Noto Serif TC", serif;
-    font-size: 19px;
-    margin: 4px 0 16px;
+    font-size: 19px; margin: 4px 0 16px;
   }
   .modal input[type=text]{
-    width:100%;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    background: white;
-    font-size: 15px;
-    margin-bottom: 12px;
+    width:100%; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: white;
+    font-size: 15px; margin-bottom: 12px;
   }
   .photo-input-btn{
-    display:block;
-    width:100%;
-    text-align:center;
-    padding: 14px;
-    border-radius: 10px;
-    border: 1.5px dashed var(--line);
-    color: var(--ink-soft);
-    font-size: 14px;
-    margin-bottom: 14px;
-    cursor: pointer;
-    background: white;
+    display:block; width:100%; text-align:center; padding: 14px;
+    border-radius: 10px; border: 1.5px dashed var(--line);
+    color: var(--ink-soft); font-size: 14px; margin-bottom: 14px;
+    cursor: pointer; background: white;
   }
   .preview-img{
-    width: 100%;
-    aspect-ratio: 1/1;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 14px;
-    display:none;
+    width: 100%; aspect-ratio: 1/1; object-fit: cover;
+    border-radius: 10px; margin-bottom: 14px; display:none;
   }
   .modal-actions{ display:flex; gap: 10px; }
   .btn{
-    flex:1;
-    padding: 13px;
-    border-radius: 10px;
-    border:none;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
+    flex:1; padding: 13px; border-radius: 10px; border:none;
+    font-size: 15px; font-weight: 600; cursor: pointer;
   }
   .btn-primary{ background: var(--ink); color:white; }
   .btn-secondary{ background: var(--line); color: var(--ink); }
@@ -262,57 +204,107 @@
 </head>
 <body>
 
-<div class="header">
-  <h1>我的衣櫃</h1>
-  <p id="subtitle">整理待洗、曬衣、乾淨的衣物</p>
+<!-- ===== Home ===== -->
+<div id="homeView">
+  <div class="home-header">
+    <h1>生活管理</h1>
+    <p>選擇一個分類開始整理</p>
+  </div>
+  <div class="module-grid" id="moduleGrid"></div>
 </div>
 
-<div class="tabs" id="tabs">
-  <button class="tab active" data-status="dirty">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M4 9h16l-1.4 9.5a2 2 0 0 1-2 1.7H7.4a2 2 0 0 1-2-1.7L4 9z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 12.5v5M12 12.5v5M15 12.5v5" stroke-width="1.4" stroke-linecap="round"/></svg>
-    髒衣籃 <span class="count" id="count-dirty"></span>
-    <span class="underline"></span>
-  </button>
-  <button class="tab" data-status="drying">
-    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4.3" r="1.3" stroke-width="1.5"/><path d="M12 5.6v2" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7.6l7.6 5.7a1.3 1.3 0 0 1-.8 2.3H5.2a1.3 1.3 0 0 1-.8-2.3L12 7.6z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 19.5h12" stroke-width="1.4" stroke-linecap="round"/></svg>
-    正在曬 <span class="count" id="count-drying"></span>
-    <span class="underline"></span>
-  </button>
-  <button class="tab" data-status="clean">
-    <svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="3" width="15" height="18" rx="1.4" stroke-width="1.6"/><line x1="12" y1="3" x2="12" y2="21" stroke-width="1.4"/><line x1="9.8" y1="12" x2="9.8" y2="12" stroke-width="2.4" stroke-linecap="round"/><line x1="14.2" y1="12" x2="14.2" y2="12" stroke-width="2.4" stroke-linecap="round"/></svg>
-    衣櫃捏 <span class="count" id="count-clean"></span>
-    <span class="underline"></span>
-  </button>
+<!-- ===== Module view (shared template) ===== -->
+<div id="moduleView" class="module-view">
+  <div class="m-header">
+    <button class="back-btn" id="backBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2 id="moduleTitle"></h2>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="grid"></div>
 </div>
-
-<div class="grid" id="grid"></div>
 
 <button class="fab" id="fabAdd">＋</button>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h2>新增衣物</h2>
-    <input type="text" id="nameInput" placeholder="例如：兔子毛襪">
-    <label class="photo-input-btn" id="photoLabel">拍照！</label>
+    <h2 id="modalTitle">新增項目</h2>
+    <input type="text" id="nameInput" placeholder="例如：藍色格紋襯衫">
+    <label class="photo-input-btn" id="photoLabel">拍照或選擇照片</label>
     <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none">
     <img id="previewImg" class="preview-img">
     <div class="modal-actions">
       <button class="btn btn-secondary" id="cancelBtn">取消</button>
-      <button class="btn btn-primary" id="saveBtn">加入衣櫃</button>
+      <button class="btn btn-primary" id="saveBtn">加入</button>
     </div>
   </div>
 </div>
 
 <script>
-const STATUS_LABEL = { dirty: '髒衣籃', drying: '正在曬', clean: '衣櫃捏' };
-let currentStatus = 'dirty';
+// ---------- Module config ----------
+const ICONS = {
+  box: `<path d="M3 8l9-4 9 4-9 4-9-4z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8v8l9 4 9-4V8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12v8" stroke-width="1.6" stroke-linecap="round"/>`,
+  wardrobe: `<rect x="4.5" y="3" width="15" height="18" rx="1.4" stroke-width="1.6"/><line x1="12" y1="3" x2="12" y2="21" stroke-width="1.4"/><line x1="9.8" y1="12" x2="9.8" y2="12" stroke-width="2.4" stroke-linecap="round"/><line x1="14.2" y1="12" x2="14.2" y2="12" stroke-width="2.4" stroke-linecap="round"/>`,
+  bottle: `<path d="M10 2h4v3.2l1.6 2.4c.4.6.4 1.4 0 2L14 12v6.5A2.5 2.5 0 0 1 11.5 21h-3A2.5 2.5 0 0 1 6 18.5V12L8.4 9.6c.4-.6.4-1.4 0-2L10 5.2V2z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 14h8" stroke-width="1.4" stroke-linecap="round"/>`,
+  paw: `<circle cx="7" cy="8" r="1.6" stroke-width="1.5"/><circle cx="12" cy="6" r="1.6" stroke-width="1.5"/><circle cx="17" cy="8" r="1.6" stroke-width="1.5"/><path d="M12 12c-3 0-5.5 2-5.5 4.5S8.5 21 12 21s5.5-1.5 5.5-4.5S15 12 12 12z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  basket: `<path d="M4 9h16l-1.4 9.5a2 2 0 0 1-2 1.7H7.4a2 2 0 0 1-2-1.7L4 9z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 12.5v5M12 12.5v5M15 12.5v5" stroke-width="1.4" stroke-linecap="round"/>`,
+  hanger: `<circle cx="12" cy="4.3" r="1.3" stroke-width="1.5"/><path d="M12 5.6v2" stroke-width="1.5" stroke-linecap="round"/><path d="M12 7.6l7.6 5.7a1.3 1.3 0 0 1-.8 2.3H5.2a1.3 1.3 0 0 1-.8-2.3L12 7.6z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 19.5h12" stroke-width="1.4" stroke-linecap="round"/>`
+};
+
+const MODULES = {
+  supplies: {
+    name: '家中物資', placeholder: '例如：衛生紙、洗衣精',
+    homeIcon: 'box', color: '#C9A24B',
+    statuses: [
+      { key:'low', label:'快用完', color:'#C97D4B' },
+      { key:'ok', label:'夠用', color:'#4F8CA6' },
+      { key:'stocked', label:'庫存充足', color:'#6B9B6E' }
+    ],
+    defaultStatus: 'stocked'
+  },
+  closet: {
+    name: '衣物', placeholder: '例如：兔子毛襪',
+    homeIcon: 'wardrobe', color: '#4F8CA6',
+    statuses: [
+      { key:'dirty', label:'髒衣籃', color:'#C97D4B', icon:'basket' },
+      { key:'drying', label:'正在曬', color:'#4F8CA6', icon:'hanger' },
+      { key:'clean', label:'衣櫃捏', color:'#6B9B6E', icon:'wardrobe' }
+    ],
+    defaultStatus: 'clean',
+    hasDryTimer: true
+  },
+  skincare: {
+    name: '保養品', placeholder: '例如：維他命C精華液',
+    homeIcon: 'bottle', color: '#B87FA0',
+    statuses: [
+      { key:'unopened', label:'未拆封', color:'#6B9B6E' },
+      { key:'using', label:'使用中', color:'#4F8CA6' },
+      { key:'empty', label:'已用完', color:'#C97D4B' }
+    ],
+    defaultStatus: 'unopened'
+  },
+  pets: {
+    name: '寵物用品', placeholder: '例如：狗糧、貓砂',
+    homeIcon: 'paw', color: '#8A9B6E',
+    statuses: [
+      { key:'low', label:'快用完', color:'#C97D4B' },
+      { key:'ok', label:'夠用', color:'#4F8CA6' },
+      { key:'stocked', label:'庫存充足', color:'#6B9B6E' }
+    ],
+    defaultStatus: 'stocked'
+  }
+};
+
+let currentModule = null;
+let currentStatus = null;
 let pendingPhotoDataUrl = null;
 let db;
 
 // ---------- IndexedDB ----------
 function openDB(){
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('ClosetAppDB', 1);
+    const req = indexedDB.open('LifeAppDB', 1);
     req.onupgradeneeded = (e) => {
       const database = e.target.result;
       if(!database.objectStoreNames.contains('items')){
@@ -323,17 +315,14 @@ function openDB(){
     req.onerror = (e) => reject(e);
   });
 }
-
 function getAllItems(){
   return new Promise((resolve, reject) => {
     const tx = db.transaction('items', 'readonly');
-    const store = tx.objectStore('items');
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result.sort((a,b) => b.dateAdded - a.dateAdded));
+    const req = tx.objectStore('items').getAll();
+    req.onsuccess = () => resolve(req.result.map(it => ({ ...it, module: it.module || 'closet' })).sort((a,b)=>b.dateAdded-a.dateAdded));
     req.onerror = (e) => reject(e);
   });
 }
-
 function putItem(item){
   return new Promise((resolve, reject) => {
     const tx = db.transaction('items', 'readwrite');
@@ -342,7 +331,6 @@ function putItem(item){
     tx.onerror = (e) => reject(e);
   });
 }
-
 function deleteItemDB(id){
   return new Promise((resolve, reject) => {
     const tx = db.transaction('items', 'readwrite');
@@ -352,78 +340,131 @@ function deleteItemDB(id){
   });
 }
 
-// ---------- Rendering ----------
-async function render(){
-  const items = await getAllItems();
-  const counts = { dirty:0, drying:0, clean:0 };
-  items.forEach(it => counts[it.status]++);
-  document.getElementById('count-dirty').textContent = counts.dirty || '';
-  document.getElementById('count-drying').textContent = counts.drying || '';
-  document.getElementById('count-clean').textContent = counts.clean || '';
-
-  const grid = document.getElementById('grid');
-  const filtered = items.filter(it => it.status === currentStatus);
-
-  if(filtered.length === 0){
-    const EMPTY_ICON = {
-      dirty: `<svg viewBox="0 0 24 24" fill="none"><path d="M4 9h16l-1.4 9.5a2 2 0 0 1-2 1.7H7.4a2 2 0 0 1-2-1.7L4 9z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-      drying: `<svg viewBox="0 0 24 24" fill="none"><path d="M12 7.6l7.6 5.7a1.3 1.3 0 0 1-.8 2.3H5.2a1.3 1.3 0 0 1-.8-2.3L12 7.6z" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 5.6v2" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="4.3" r="1.3" stroke-width="1.5"/></svg>`,
-      clean: `<svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="3" width="15" height="18" rx="1.4" stroke-width="1.6"/><line x1="12" y1="3" x2="12" y2="21" stroke-width="1.4"/></svg>`
-    };
-    const EMPTY_MSG = {
-      dirty: '髒衣籃是空的',
-      drying: '沒有衣物在曬',
-      clean: '衣櫃還是空的'
-    };
-    grid.innerHTML = `<div class="empty">${EMPTY_ICON[currentStatus]}${EMPTY_MSG[currentStatus]}<br><br>點擊右下角「＋」新增一件</div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(item => `
-    <div class="card" data-id="${item.id}">
-      <div class="photo-wrap">
-        <img src="${item.photo}" alt="${escapeHtml(item.name)}">
-        <span class="tag ${item.status}">${STATUS_LABEL[item.status]}</span>
-      </div>
-      <div class="info">
-        <p class="name">${escapeHtml(item.name)}</p>
-        ${item.status === 'drying' ? dryTimeHtml(item.lastStatusChange) : ''}
-        <div class="move-row">
-          ${Object.keys(STATUS_LABEL).filter(s => s !== item.status).map(s =>
-            `<button class="move-btn" data-move="${s}">→ ${STATUS_LABEL[s]}</button>`
-          ).join('')}
-        </div>
-        <button class="del-btn" data-del="1">刪除</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function dryTimeHtml(since){
-  if(!since) return '';
-  const hours = Math.floor((Date.now() - since) / 3600000);
-  const overdue = hours >= 24;
-  const label = hours < 1 ? '剛掛上' :
-    hours < 24 ? `已曬 ${hours} 小時` :
-    `已曬 ${Math.floor(hours / 24)} 天`;
-  return `<p class="dry-time ${overdue ? 'overdue' : ''}">${label}${overdue ? '・該收了' : ''}</p>`;
-}
-
 function escapeHtml(str){
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
 
-// ---------- Events ----------
+// ---------- Home ----------
+async function renderHome(){
+  const items = await getAllItems();
+  const counts = {};
+  items.forEach(it => { counts[it.module] = (counts[it.module]||0) + 1; });
+
+  const grid = document.getElementById('moduleGrid');
+  grid.innerHTML = Object.keys(MODULES).map(id => {
+    const m = MODULES[id];
+    const n = counts[id] || 0;
+    return `
+      <button class="module-card" data-module="${id}">
+        <div class="icon-wrap" style="background:${m.color}">
+          <svg viewBox="0 0 24 24">${ICONS[m.homeIcon]}</svg>
+        </div>
+        <h3>${m.name}</h3>
+        <div class="sub">${n > 0 ? n + ' 項' : '尚未新增'}</div>
+      </button>
+    `;
+  }).join('');
+}
+
+document.getElementById('moduleGrid').addEventListener('click', (e) => {
+  const card = e.target.closest('.module-card');
+  if(!card) return;
+  openModule(card.dataset.module);
+});
+
+// ---------- Module view ----------
+function openModule(id){
+  currentModule = id;
+  currentStatus = MODULES[id].statuses[0].key;
+  document.getElementById('homeView').classList.add('hidden');
+  document.getElementById('moduleView').classList.add('active');
+  document.getElementById('moduleTitle').textContent = MODULES[id].name;
+  renderTabs();
+  renderGrid();
+}
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  document.getElementById('moduleView').classList.remove('active');
+  document.getElementById('homeView').classList.remove('hidden');
+  currentModule = null;
+  renderHome();
+});
+
+function renderTabs(){
+  const m = MODULES[currentModule];
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = m.statuses.map(s => `
+    <button class="tab ${s.key === currentStatus ? 'active' : ''}" data-status="${s.key}">
+      ${s.label} <span class="count" id="count-${s.key}"></span>
+      <span class="underline" style="background:${s.key === currentStatus ? s.color : 'transparent'}"></span>
+    </button>
+  `).join('');
+}
+
 document.getElementById('tabs').addEventListener('click', (e) => {
   const tab = e.target.closest('.tab');
   if(!tab) return;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  tab.classList.add('active');
   currentStatus = tab.dataset.status;
-  render();
+  renderTabs();
+  renderGrid();
 });
+
+function dryTimeHtml(since){
+  if(!since) return '';
+  const hours = Math.floor((Date.now() - since) / 3600000);
+  const overdue = hours >= 24;
+  const label = hours < 1 ? '剛掛上' : hours < 24 ? `已曬 ${hours} 小時` : `已曬 ${Math.floor(hours/24)} 天`;
+  return `<p class="dry-time ${overdue ? 'overdue' : ''}">${label}${overdue ? '・該收了' : ''}</p>`;
+}
+
+async function renderGrid(){
+  const m = MODULES[currentModule];
+  const items = await getAllItems();
+  const moduleItems = items.filter(it => it.module === currentModule);
+
+  const counts = {};
+  moduleItems.forEach(it => { counts[it.status] = (counts[it.status]||0) + 1; });
+  m.statuses.forEach(s => {
+    const el = document.getElementById(`count-${s.key}`);
+    if(el) el.textContent = counts[s.key] || '';
+  });
+
+  const grid = document.getElementById('grid');
+  const filtered = moduleItems.filter(it => it.status === currentStatus);
+
+  if(filtered.length === 0){
+    const statusInfo = m.statuses.find(s => s.key === currentStatus);
+    grid.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24">${ICONS[statusInfo.icon || m.homeIcon]}</svg>
+      這裡還沒有項目<br>點右下角「＋」新增一件
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(item => {
+    const s = m.statuses.find(x => x.key === item.status);
+    return `
+    <div class="card" data-id="${item.id}">
+      <div class="photo-wrap">
+        <img src="${item.photo}" alt="${escapeHtml(item.name)}">
+        <span class="tag" style="background:${s.color}">${s.label}</span>
+      </div>
+      <div class="info">
+        <p class="name">${escapeHtml(item.name)}</p>
+        ${m.hasDryTimer && item.status === 'drying' ? dryTimeHtml(item.lastStatusChange) : ''}
+        <div class="move-row">
+          ${m.statuses.filter(x => x.key !== item.status).map(x =>
+            `<button class="move-btn" data-move="${x.key}">→ ${x.label}</button>`
+          ).join('')}
+        </div>
+        <button class="del-btn" data-del="1">刪除</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
 
 document.getElementById('grid').addEventListener('click', async (e) => {
   const card = e.target.closest('.card');
@@ -436,22 +477,29 @@ document.getElementById('grid').addEventListener('click', async (e) => {
     item.status = e.target.dataset.move;
     item.lastStatusChange = Date.now();
     await putItem(item);
-    render();
+    renderTabs();
+    renderGrid();
   }
   if(e.target.dataset.del){
-    if(confirm('確定要刪除這件衣物嗎？')){
+    if(confirm('確定要刪除這個項目嗎？')){
       await deleteItemDB(id);
-      render();
+      renderTabs();
+      renderGrid();
     }
   }
 });
 
+// ---------- Add modal ----------
 const modalOverlay = document.getElementById('modalOverlay');
 const photoInput = document.getElementById('photoInput');
 const previewImg = document.getElementById('previewImg');
 const nameInput = document.getElementById('nameInput');
 
 document.getElementById('fabAdd').addEventListener('click', () => {
+  if(!currentModule){ alert('請先選擇一個分類'); return; }
+  const m = MODULES[currentModule];
+  document.getElementById('modalTitle').textContent = `新增${m.name}`;
+  nameInput.placeholder = m.placeholder;
   nameInput.value = '';
   previewImg.style.display = 'none';
   previewImg.src = '';
@@ -462,11 +510,7 @@ document.getElementById('fabAdd').addEventListener('click', () => {
 document.getElementById('cancelBtn').addEventListener('click', () => {
   modalOverlay.classList.remove('open');
 });
-
-document.getElementById('photoLabel').addEventListener('click', () => {
-  photoInput.click();
-});
-
+document.getElementById('photoLabel').addEventListener('click', () => photoInput.click());
 photoInput.addEventListener('change', () => {
   const file = photoInput.files[0];
   if(!file) return;
@@ -481,30 +525,31 @@ photoInput.addEventListener('change', () => {
 
 document.getElementById('saveBtn').addEventListener('click', async () => {
   const name = nameInput.value.trim();
-  if(!name){ alert('請輸入衣物名稱'); return; }
-  if(!pendingPhotoDataUrl){ alert('請先拍照！'); return; }
+  if(!name){ alert('請輸入名稱'); return; }
+  if(!pendingPhotoDataUrl){ alert('請先拍照或選擇照片'); return; }
 
+  const m = MODULES[currentModule];
   const item = {
     id: Date.now().toString(),
+    module: currentModule,
     name,
-    status: 'clean',
+    status: m.defaultStatus,
     photo: pendingPhotoDataUrl,
     dateAdded: Date.now(),
     lastStatusChange: Date.now()
   };
   await putItem(item);
   modalOverlay.classList.remove('open');
-  currentStatus = 'clean';
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelector('.tab[data-status="clean"]').classList.add('active');
-  render();
+  currentStatus = m.defaultStatus;
+  renderTabs();
+  renderGrid();
 });
 
 // ---------- Init ----------
 (async function init(){
   db = await openDB();
-  render();
-  setInterval(render, 60000);
+  renderHome();
+  setInterval(() => { if(currentModule) renderGrid(); }, 60000);
 })();
 </script>
 </body>
