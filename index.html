@@ -147,6 +147,31 @@
     background: none; border: none; padding: 0; cursor: pointer;
   }
 
+  /* inventory-style card (生活物資) */
+  .counter-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 6px;
+  }
+  .counter-row .clabel{ font-size: 11px; color: var(--ink-soft); }
+  .counter-controls{ display:flex; align-items:center; gap: 8px; }
+  .counter-btn{
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    font-size: 14px; font-weight: 700; line-height: 1;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .counter-value{ min-width: 18px; text-align:center; font-size: 13px; font-weight: 700; }
+  .counter-value.zero-stock{ color: var(--c1); }
+
+  .qty-row{ display:flex; gap: 10px; margin-bottom: 12px; }
+  .qty-field{ flex:1; }
+  .qty-field label{ display:block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .qty-field input{
+    width:100%; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: white; font-size: 15px;
+  }
+
   .empty{
     grid-column: 1 / -1; text-align:center; color: var(--ink-soft);
     padding: 50px 20px; font-size: 14px;
@@ -231,8 +256,18 @@
   <div class="modal">
     <h2 id="modalTitle">新增項目</h2>
     <input type="text" id="nameInput" placeholder="例如：藍色格紋襯衫">
+    <div class="qty-row" id="qtyRow" style="display:none">
+      <div class="qty-field">
+        <label id="qtyLabel1">正在使用</label>
+        <input type="number" id="qtyInput1" min="0" value="1">
+      </div>
+      <div class="qty-field">
+        <label id="qtyLabel2">庫存數量</label>
+        <input type="number" id="qtyInput2" min="0" value="0">
+      </div>
+    </div>
     <label class="photo-input-btn" id="photoLabel">拍照或選擇照片</label>
-    <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none">
+    <input type="file" accept="image/*" id="photoInput" style="display:none">
     <img id="previewImg" class="preview-img">
     <div class="modal-actions">
       <button class="btn btn-secondary" id="cancelBtn">取消</button>
@@ -254,14 +289,13 @@ const ICONS = {
 
 const MODULES = {
   supplies: {
-    name: '家中物資', placeholder: '例如：衛生紙、洗衣精',
+    name: '生活物資', placeholder: '例如：衛生紙、洗衣精',
     homeIcon: 'box', color: '#C9A24B',
-    statuses: [
-      { key:'low', label:'快用完', color:'#C97D4B' },
-      { key:'ok', label:'夠用', color:'#4F8CA6' },
-      { key:'stocked', label:'庫存充足', color:'#6B9B6E' }
-    ],
-    defaultStatus: 'stocked'
+    type: 'inventory',
+    counters: [
+      { key:'inUse', label:'正在使用' },
+      { key:'stock', label:'庫存數量' }
+    ]
   },
   closet: {
     name: '衣物', placeholder: '例如：兔子毛襪',
@@ -377,10 +411,12 @@ document.getElementById('moduleGrid').addEventListener('click', (e) => {
 // ---------- Module view ----------
 function openModule(id){
   currentModule = id;
-  currentStatus = MODULES[id].statuses[0].key;
+  const m = MODULES[id];
+  currentStatus = m.type === 'inventory' ? null : m.statuses[0].key;
   document.getElementById('homeView').classList.add('hidden');
   document.getElementById('moduleView').classList.add('active');
-  document.getElementById('moduleTitle').textContent = MODULES[id].name;
+  document.getElementById('moduleTitle').textContent = m.name;
+  document.getElementById('tabs').style.display = m.type === 'inventory' ? 'none' : 'flex';
   renderTabs();
   renderGrid();
 }
@@ -395,6 +431,7 @@ document.getElementById('backBtn').addEventListener('click', () => {
 function renderTabs(){
   const m = MODULES[currentModule];
   const tabs = document.getElementById('tabs');
+  if(m.type === 'inventory'){ tabs.innerHTML = ''; return; }
   tabs.innerHTML = m.statuses.map(s => `
     <button class="tab ${s.key === currentStatus ? 'active' : ''}" data-status="${s.key}">
       ${s.label} <span class="count" id="count-${s.key}"></span>
@@ -423,6 +460,39 @@ async function renderGrid(){
   const m = MODULES[currentModule];
   const items = await getAllItems();
   const moduleItems = items.filter(it => it.module === currentModule);
+  const grid = document.getElementById('grid');
+
+  if(m.type === 'inventory'){
+    if(moduleItems.length === 0){
+      grid.innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24">${ICONS[m.homeIcon]}</svg>
+        還沒有物資紀錄<br>點右下角「＋」新增一項
+      </div>`;
+      return;
+    }
+    grid.innerHTML = moduleItems.map(item => `
+      <div class="card inv-card" data-id="${item.id}">
+        <div class="photo-wrap">
+          <img src="${item.photo}" alt="${escapeHtml(item.name)}">
+        </div>
+        <div class="info">
+          <p class="name">${escapeHtml(item.name)}</p>
+          ${m.counters.map(c => `
+            <div class="counter-row">
+              <span class="clabel">${c.label}</span>
+              <div class="counter-controls">
+                <button class="counter-btn" data-counter="${c.key}" data-delta="-1">−</button>
+                <span class="counter-value ${c.key==='stock' && (item[c.key]||0) === 0 ? 'zero-stock' : ''}" id="val-${item.id}-${c.key}">${item[c.key] || 0}</span>
+                <button class="counter-btn" data-counter="${c.key}" data-delta="1">＋</button>
+              </div>
+            </div>
+          `).join('')}
+          <button class="del-btn" data-del="1">刪除</button>
+        </div>
+      </div>
+    `).join('');
+    return;
+  }
 
   const counts = {};
   moduleItems.forEach(it => { counts[it.status] = (counts[it.status]||0) + 1; });
@@ -431,7 +501,6 @@ async function renderGrid(){
     if(el) el.textContent = counts[s.key] || '';
   });
 
-  const grid = document.getElementById('grid');
   const filtered = moduleItems.filter(it => it.status === currentStatus);
 
   if(filtered.length === 0){
@@ -480,6 +549,19 @@ document.getElementById('grid').addEventListener('click', async (e) => {
     renderTabs();
     renderGrid();
   }
+  if(e.target.dataset.counter){
+    const key = e.target.dataset.counter;
+    const delta = parseInt(e.target.dataset.delta, 10);
+    const items = await getAllItems();
+    const item = items.find(it => it.id === id);
+    item[key] = Math.max(0, (item[key] || 0) + delta);
+    await putItem(item);
+    const valEl = document.getElementById(`val-${id}-${key}`);
+    if(valEl){
+      valEl.textContent = item[key];
+      valEl.classList.toggle('zero-stock', key === 'stock' && item[key] === 0);
+    }
+  }
   if(e.target.dataset.del){
     if(confirm('確定要刪除這個項目嗎？')){
       await deleteItemDB(id);
@@ -504,6 +586,18 @@ document.getElementById('fabAdd').addEventListener('click', () => {
   previewImg.style.display = 'none';
   previewImg.src = '';
   pendingPhotoDataUrl = null;
+
+  const qtyRow = document.getElementById('qtyRow');
+  if(m.type === 'inventory'){
+    qtyRow.style.display = 'flex';
+    document.getElementById('qtyLabel1').textContent = m.counters[0].label;
+    document.getElementById('qtyLabel2').textContent = m.counters[1].label;
+    document.getElementById('qtyInput1').value = 1;
+    document.getElementById('qtyInput2').value = 0;
+  } else {
+    qtyRow.style.display = 'none';
+  }
+
   modalOverlay.classList.add('open');
 });
 
@@ -533,14 +627,21 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     id: Date.now().toString(),
     module: currentModule,
     name,
-    status: m.defaultStatus,
     photo: pendingPhotoDataUrl,
     dateAdded: Date.now(),
     lastStatusChange: Date.now()
   };
+
+  if(m.type === 'inventory'){
+    item[m.counters[0].key] = parseInt(document.getElementById('qtyInput1').value, 10) || 0;
+    item[m.counters[1].key] = parseInt(document.getElementById('qtyInput2').value, 10) || 0;
+  } else {
+    item.status = m.defaultStatus;
+    currentStatus = m.defaultStatus;
+  }
+
   await putItem(item);
   modalOverlay.classList.remove('open');
-  currentStatus = m.defaultStatus;
   renderTabs();
   renderGrid();
 });
